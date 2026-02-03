@@ -1,0 +1,19 @@
+project_id = "yjbynuzcbxpyradvdkxz"
+
+[functions.firecrawl-search]
+verify_jwt = false
+
+[functions.firecrawl-scrape]
+verify_jwt = false
+
+[functions.sync-sheets]
+verify_jwt = false
+
+[functions.ai-lead-discovery]
+verify_jwt = false
+
+[functions.send-lead-email]
+verify_jwt = false
+
+[functions.scheduled-lead-discovery]
+verify_jwt = false
