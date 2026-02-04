@@ -241,7 +241,7 @@ export function LeadDiscovery({ onLeadsImported }: LeadDiscoveryProps) {
           console.log(`AI found ${leads?.length || 0} leads`);
           
           // Convert AI leads to our format
-          finalLeads = (leads || []).map((lead, index) => ({
+          finalLeads = classifyAndFilterLeads((leads || []).map((lead, index) => ({
             id: `ai-lead-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
             companyName: lead.companyName,
             industry: lead.industry,
@@ -265,7 +265,7 @@ export function LeadDiscovery({ onLeadsImported }: LeadDiscoveryProps) {
             aiAnalyzed: true,
             searchIntent: lead.searchIntent,
             reasoning: lead.reasoning,
-          }));
+          })));
           
           // Send notifications for high-priority leads (without audio to avoid AbortError)
           if (notificationPermission === 'granted' && finalLeads.length > 0) {
@@ -293,11 +293,11 @@ export function LeadDiscovery({ onLeadsImported }: LeadDiscoveryProps) {
           // Fallback to basic parsing if AI fails
           console.warn('AI analysis failed, using basic parsing:', aiResponse.error);
           toast.warning(`AI analysis unavailable (${aiResponse.error}), using basic parsing...`);
-          finalLeads = parseLeadsBasic(allSearchResults, existingCompanyNames);
+          finalLeads = classifyAndFilterLeads(parseLeadsBasic(allSearchResults, existingCompanyNames));
         }
       } else {
         // Basic parsing without AI
-        finalLeads = parseLeadsBasic(allSearchResults, existingCompanyNames);
+        finalLeads = classifyAndFilterLeads(parseLeadsBasic(allSearchResults, existingCompanyNames));
       }
       
       // Sort by quality score
@@ -317,6 +317,21 @@ export function LeadDiscovery({ onLeadsImported }: LeadDiscoveryProps) {
       setIsAnalyzing(false);
       setSearchProgress({ current: 0, total: 0, phase: '' });
     }
+  };
+
+  // Filter and classify leads by sector
+  const classifyAndFilterLeads = (leads: DiscoveredLead[]): DiscoveredLead[] => {
+    const sectors = [
+      'factory', 'hotel', 'hospital', 'marine', 'plantation', 'upstream', 'downstream', 'contractor'
+    ];
+    return leads.filter(lead => {
+      const isEndUser = sectors.some(sector => lead.industry.toLowerCase().includes(sector));
+      const isSupplier = /supplier|reseller/i.test(lead.industry);
+      return isEndUser && !isSupplier;
+    }).map(lead => ({
+      ...lead,
+      industry: sectors.find(sector => lead.industry.toLowerCase().includes(sector)) || lead.industry
+    }));
   };
 
   // Basic parsing fallback (without AI)

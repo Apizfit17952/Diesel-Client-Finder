@@ -56,6 +56,7 @@ export function LeadScoringDashboard({ refreshTrigger }: LeadScoringDashboardPro
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [sectorStats, setSectorStats] = useState<{ sector: string; count: number; topCompanies: string[] }[]>([]);
 
   const loadClientsAndScore = async () => {
     if (!user) return;
@@ -66,10 +67,25 @@ export function LeadScoringDashboard({ refreshTrigger }: LeadScoringDashboardPro
         .from('diesel_clients')
         .select('*')
         .is('archived_at', null)  // Only score non-archived leads
-        .order('estimated_usage', { ascending: false })
-        .limit(50);
+        .order('estimated_usage', { ascending: false });
 
       if (error) throw error;
+
+      // Classify leads by sector
+      const sectors = ['factory', 'hotel', 'hospital', 'marine', 'plantation', 'upstream', 'downstream', 'contractor'];
+      const leadsBySector = sectors.reduce((acc, sector) => {
+        acc[sector] = (clients || []).filter(client => client.industry.toLowerCase().includes(sector));
+        return acc;
+      }, {} as Record<string, LeadScore[]>);
+
+      // Display counts and top companies per sector
+      const stats = sectors.map(sector => ({
+        sector,
+        count: leadsBySector[sector].length,
+        topCompanies: leadsBySector[sector].slice(0, 10).map(client => client.company_name)
+      }));
+
+      setSectorStats(stats);
 
       // Calculate scores for each client
       const scores: LeadScore[] = (clients || []).map(client => {
@@ -324,6 +340,31 @@ export function LeadScoringDashboard({ refreshTrigger }: LeadScoringDashboardPro
             )}
           </Button>
         </div>
+      </div>
+
+      {/* Sector Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {sectorStats.map(({ sector, count, topCompanies }) => (
+          <Card key={sector}>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">{sector.charAt(0).toUpperCase() + sector.slice(1)} Sector</p>
+                  <p className="text-2xl font-bold">{count}</p>
+                </div>
+                <Zap className="h-8 w-8 text-primary" />
+              </div>
+              <div className="mt-3">
+                <p className="text-sm text-muted-foreground">Top Companies:</p>
+                <ul className="list-disc list-inside">
+                  {topCompanies.map((company, index) => (
+                    <li key={index} className="text-xs text-muted-foreground">{company}</li>
+                  ))}
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Score Summary Cards */}
