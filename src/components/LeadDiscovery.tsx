@@ -319,6 +319,30 @@ export function LeadDiscovery({ onLeadsImported }: LeadDiscoveryProps) {
     }
   };
 
+  // Function to continuously scan for leads
+  const startContinuousScan = () => {
+    setInterval(async () => {
+      const newLeads = await handleSearch();
+      if (newLeads.length > 0) {
+        notifyNewLeads(newLeads);
+      }
+    }, 3600000);  // Run every hour
+  };
+
+  // Function to notify about new quality leads
+  const notifyNewLeads = (leads: DiscoveredLead[]) => {
+    leads.forEach(lead => {
+      if (lead.qualityScore >= 70) {  // Only notify for high-quality leads
+        toast.success(`New high-quality lead found: ${lead.companyName}`);
+        // Additional notification logic (e.g., push notifications)
+      }
+    });
+  };
+
+  useEffect(() => {
+    startContinuousScan();
+  }, []);
+
   // Filter and classify leads by sector
   const classifyAndFilterLeads = (leads: DiscoveredLead[]): DiscoveredLead[] => {
     const sectors = [
@@ -702,7 +726,7 @@ export function LeadDiscovery({ onLeadsImported }: LeadDiscoveryProps) {
           <div className="flex items-center gap-3 p-4 bg-primary/10 rounded-lg border border-primary/20">
             <div className="relative">
               <Brain className="h-6 w-6 text-primary animate-pulse" />
-              <Sparkles className="h-3 w-3 text-primary absolute -top-1 -right-1" />
+              <Sparkles className="h-3 w-3 absolute -top-1 -right-1 text-primary" />
             </div>
             <div>
               <p className="font-medium">AI is analyzing search results...</p>
