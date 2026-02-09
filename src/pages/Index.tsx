@@ -148,6 +148,12 @@ export default function Index() {
           pantaiTimur: 'Pantai Timur',
           pantaiBarat: 'Pantai Barat',
           borneo: 'Borneo',
+          // Handle direct region values
+          'Pantai Timur': 'Pantai Timur',
+          'Utara': 'Utara',
+          'Tengah': 'Tengah',
+          'Selatan': 'Selatan',
+          'Borneo': 'Borneo',
         };
         if (client.region !== regionMap[selectedRegion]) return false;
       }

@@ -124,9 +124,45 @@ export const aiLeadDiscoveryApi = {
         'logistics port Johor diesel fleet management',
         'manufacturing factory Johor diesel generator',
       ],
+      'Sabah': [
+        'kilang pembalakan Sabah diesel generator "Sdn Bhd"',
+        'ladang kelapa sawit Sandakan diesel fuel supply',
+        'syarikat pembinaan Kota Kinabalu heavy machinery diesel',
+        'pelabuhan Tawau marine diesel bunker',
+        'kilang minyak sawit Lahad Datu diesel industrial',
+        'kontraktor pembinaan Sabah diesel equipment',
+        'syarikat pengangkutan lori Sabah diesel fleet',
+        'kilang pembuatan Kota Kinabalu industrial diesel',
+        'ladang getah Tawau diesel processing',
+        'pembekal diesel Sabah bulk fuel supply',
+        'palm oil mill Sandakan diesel generator power',
+        'construction company Kota Kinabalu heavy equipment diesel',
+        'logging contractor Sabah diesel machinery',
+        'quarry mining Sabah diesel consumption',
+      ],
+      'Sarawak': [
+        'kilang kelapa sawit Kuching diesel generator "Berhad"',
+        'syarikat pembinaan Kuching diesel heavy machinery',
+        'pelabuhan Bintulu marine diesel bunker',
+        'ladang sawit Miri diesel fuel supply',
+        'kilang pembuatan Kuching industrial diesel',
+        'kontraktor perlombongan Sarawak diesel equipment',
+        'syarikat pengangkutan lori Sarawak diesel fleet',
+        'palm oil mill Bintulu diesel generator',
+        'construction company Miri heavy machinery diesel',
+        'logging contractor Kuching diesel equipment',
+        'pembekal diesel Sarawak bulk fuel supply',
+        'quarry mining Bintulu diesel consumption',
+      ],
     };
 
-    const regionQueries = baseQueries[region] || baseQueries['Pantai Timur'];
+    // Handle Borneo region by combining Sabah and Sarawak queries
+    let regionQueries: string[] = [];
+    if (region === 'Borneo') {
+      regionQueries = [...(baseQueries['Sabah'] || []), ...(baseQueries['Sarawak'] || [])];
+    } else {
+      regionQueries = baseQueries[region] || baseQueries['Pantai Timur'];
+    }
     
     // Filter out already used queries and shuffle for variety
     const availableQueries = regionQueries.filter(q => !usedQueries.includes(q));
